@@ -2,7 +2,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Solstice.API.DATA;
+using Football.API.DATA;
+using System.Linq.Expressions;
+using System;
 
 namespace FootbalDataAPI.DATA
 {
@@ -25,17 +27,23 @@ namespace FootbalDataAPI.DATA
 
         public async Task<bool> CompetitionExists(int competitionId)
         {
-           return await _context.Competitions.AnyAsync(c => c.Id == competitionId);
+            return await _context.Competitions.AnyAsync(c => c.Id == competitionId);
         }
 
-        public async Task<int> TotalPlayers (string leagueCode) {
+        public async Task<bool> CheckIfEntityExistsByEntityId<T>(Expression<Func<T, bool>> expr) where T : class
+        {
+            DbSet<T> DbSet = _context.Set<T>();
+            return await DbSet.AnyAsync(expr);
+        }
+
+        public async Task<int> TotalPlayers(string leagueCode)
+        {
             var competition = await _context.Competitions.Where(c => c.Code == leagueCode).FirstOrDefaultAsync();
 
-            var result = await (from pl in _context.Players
-                            join tm in _context.Teams on pl.TeamId equals tm.Id
-                            where tm.Competitions.Any(t => t.CompetitionId == competition.Id)
-                            select pl).CountAsync();
-            
+            var result = await (from pt in _context.TeamPlayers
+                                join tm in _context.Teams on pt.TeamId equals tm.Id
+                                where tm.Competitions.Any(t => t.CompetitionId == competition.Id)
+                                select pt).CountAsync();
             return result;
         }
     }

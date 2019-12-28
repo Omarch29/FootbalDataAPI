@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using Solstice.API.models;
 
-namespace Solstice.API.Helpers
+namespace Football.API.Helpers
 {
     public static class Extensions
     {

@@ -23,26 +23,20 @@ namespace Solstice.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Contacts",
+                name: "Players",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ProfileImage = table.Column<string>(nullable: true),
-                    FirstName = table.Column<string>(nullable: true),
-                    LastName = table.Column<string>(nullable: true),
-                    Company = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(nullable: true),
-                    Birthdate = table.Column<DateTime>(nullable: false),
-                    AddressNumber = table.Column<int>(nullable: false),
-                    Address = table.Column<string>(nullable: true),
-                    City = table.Column<string>(nullable: true),
-                    State = table.Column<string>(nullable: true),
-                    Zip = table.Column<int>(nullable: false)
+                    Name = table.Column<string>(nullable: true),
+                    Position = table.Column<string>(nullable: true),
+                    DateOfBirth = table.Column<DateTime>(nullable: false),
+                    CountryOfBirth = table.Column<string>(nullable: true),
+                    Nationality = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Contacts", x => x.Id);
+                    table.PrimaryKey("PK_Players", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -60,27 +54,6 @@ namespace Solstice.API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Teams", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "PhoneNumbers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ContactId = table.Column<int>(nullable: false),
-                    Number = table.Column<string>(nullable: true),
-                    IsPersonal = table.Column<bool>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PhoneNumbers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PhoneNumbers_Contacts_ContactId",
-                        column: x => x.ContactId,
-                        principalTable: "Contacts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -108,27 +81,27 @@ namespace Solstice.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Players",
+                name: "TeamPlayers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(nullable: true),
-                    Position = table.Column<string>(nullable: true),
-                    DateOfBirth = table.Column<DateTime>(nullable: false),
-                    CountryOfBirth = table.Column<string>(nullable: true),
-                    Nationality = table.Column<string>(nullable: true),
-                    TeamId = table.Column<int>(nullable: false)
+                    TeamId = table.Column<int>(nullable: false),
+                    PlayerId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Players", x => x.Id);
+                    table.PrimaryKey("PK_TeamPlayers", x => new { x.PlayerId, x.TeamId });
                     table.ForeignKey(
-                        name: "FK_Players_Teams_TeamId",
+                        name: "FK_TeamPlayers_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_TeamPlayers_Teams_TeamId",
                         column: x => x.TeamId,
                         principalTable: "Teams",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -137,13 +110,8 @@ namespace Solstice.API.Migrations
                 column: "TeamId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PhoneNumbers_ContactId",
-                table: "PhoneNumbers",
-                column: "ContactId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Players_TeamId",
-                table: "Players",
+                name: "IX_TeamPlayers_TeamId",
+                table: "TeamPlayers",
                 column: "TeamId");
         }
 
@@ -153,16 +121,13 @@ namespace Solstice.API.Migrations
                 name: "CompetitionTeams");
 
             migrationBuilder.DropTable(
-                name: "PhoneNumbers");
-
-            migrationBuilder.DropTable(
-                name: "Players");
+                name: "TeamPlayers");
 
             migrationBuilder.DropTable(
                 name: "Competitions");
 
             migrationBuilder.DropTable(
-                name: "Contacts");
+                name: "Players");
 
             migrationBuilder.DropTable(
                 name: "Teams");

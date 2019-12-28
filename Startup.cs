@@ -14,10 +14,10 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
-using Solstice.API.DATA;
-using Solstice.API.Helpers;
+using Football.API.DATA;
+using Football.API.Helpers;
 
-namespace Solstice.API
+namespace Football.API
 {
     public class Startup
     {
@@ -42,7 +42,7 @@ namespace Solstice.API
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Solstice API",
+                    Title = "Football API",
                     Description = "A simple example ASP.NET Core Web API",
                     Contact = new OpenApiContact
                     {
@@ -59,8 +59,6 @@ namespace Solstice.API
 
             services.AddCors();
             services.AddAutoMapper();
-            //services.AddTransient<Seed>();
-            services.AddScoped<IContactRepository, ContactRepository>();
             services.AddScoped<IFootballDataRepository, FootballDataRepository>();
             services.AddScoped<IFootBallApiService, FootballApiService>();
         }
@@ -78,7 +76,7 @@ namespace Solstice.API
 
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Solstice Example V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Football Example V1");
                 c.RoutePrefix = string.Empty;
             });
 

@@ -11,6 +11,6 @@ namespace FootbalDataAPI.models
         public string AreaName { get; set; }
         public string Email { get; set; }
         public IList<CompetitionTeam> Competitions { get; set; }
-        public IList<Player> Squad { get; set; }
+        public IList<TeamPlayer> Squad { get; set; }
     }
 }
