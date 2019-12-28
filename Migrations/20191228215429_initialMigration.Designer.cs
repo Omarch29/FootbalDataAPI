@@ -9,14 +9,87 @@ using Solstice.API.DATA;
 namespace Solstice.API.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20190823005949_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20191228215429_initialMigration")]
+    partial class initialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
+
+            modelBuilder.Entity("FootbalDataAPI.models.Competition", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("AreaName");
+
+                    b.Property<string>("Code");
+
+                    b.Property<string>("Name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Competitions");
+                });
+
+            modelBuilder.Entity("FootbalDataAPI.models.CompetitionTeam", b =>
+                {
+                    b.Property<int>("CompetitionId");
+
+                    b.Property<int>("TeamId");
+
+                    b.HasKey("CompetitionId", "TeamId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("CompetitionTeams");
+                });
+
+            modelBuilder.Entity("FootbalDataAPI.models.Player", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("CountryOfBirth");
+
+                    b.Property<DateTime>("DateOfBirth");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Nationality");
+
+                    b.Property<string>("Position");
+
+                    b.Property<int>("TeamId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("Players");
+                });
+
+            modelBuilder.Entity("FootbalDataAPI.models.Team", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("AreaName");
+
+                    b.Property<string>("Email");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("ShortName");
+
+                    b.Property<string>("Tla");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Teams");
+                });
 
             modelBuilder.Entity("Solstice.API.models.Contact", b =>
                 {
@@ -52,6 +125,27 @@ namespace Solstice.API.Migrations
                     b.HasIndex("ContactId");
 
                     b.ToTable("PhoneNumbers");
+                });
+
+            modelBuilder.Entity("FootbalDataAPI.models.CompetitionTeam", b =>
+                {
+                    b.HasOne("FootbalDataAPI.models.Competition", "Competition")
+                        .WithMany("Teams")
+                        .HasForeignKey("CompetitionId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("FootbalDataAPI.models.Team", "Team")
+                        .WithMany("Competitions")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("FootbalDataAPI.models.Player", b =>
+                {
+                    b.HasOne("FootbalDataAPI.models.Team", "Team")
+                        .WithMany("Squad")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Solstice.API.models.Contact", b =>

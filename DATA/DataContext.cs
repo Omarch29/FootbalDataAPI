@@ -1,3 +1,4 @@
+using FootbalDataAPI.models;
 using Microsoft.EntityFrameworkCore;
 using Solstice.API.models;
 namespace Solstice.API.DATA
@@ -9,9 +10,45 @@ namespace Solstice.API.DATA
         public DbSet<Contact> Contacts { get; set; }
         public DbSet<PhoneNumber> PhoneNumbers { get; set; }
 
+        public DbSet<Competition> Competitions { get; set; }
+        public DbSet<Team> Teams { get; set; }
+        public DbSet<CompetitionTeam> CompetitionTeams { get; set; }
+        public DbSet<Player> Players { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             // Fluent API
+
+            builder.Entity<CompetitionTeam>(compTeam => {
+                compTeam.HasKey(ct => new { ct.CompetitionId, ct.TeamId});
+
+                compTeam.HasOne<Competition>(cp => cp.Competition)
+                .WithMany(c => c.Teams)
+                .HasForeignKey(cp => cp.CompetitionId);
+
+                compTeam.HasOne<Team>(cp => cp.Team)
+                .WithMany(c => c.Competitions)
+                .HasForeignKey(cp => cp.TeamId);
+            });
+
+            builder.Entity<Competition>(comp => {
+                comp.HasKey(c => c.Id);
+            });
+
+            builder.Entity<Team>(team => {
+                team.HasKey(t => t.Id);
+            });
+
+            builder.Entity<Player>(play => {
+                play.HasKey(p => p.Id);
+
+                play.HasOne(p => p.Team)
+                .WithMany(t => t.Squad)
+                .HasForeignKey(p => p.TeamId)
+                .OnDelete(DeleteBehavior.Restrict);
+            });
+            
+
 
             builder.Entity<Contact>(contact =>
             {

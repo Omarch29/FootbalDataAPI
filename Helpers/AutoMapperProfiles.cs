@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using AutoMapper;
+using FootbalDataAPI.DTOs;
+using FootbalDataAPI.models;
 using Solstice.API.DTOs;
 using Solstice.API.models;
 
@@ -21,8 +24,16 @@ namespace Solstice.API.Helpers
             CreateMap<PhoneNumber, PhoneNumberDTO>()
             .ForMember(dest => dest.Type, opt => {opt.MapFrom(src => src.WorkOrPersonal());});
 
+         
+            CreateMap<CompetitionDTO, Competition>()
+            .ForMember(dest => dest.AreaName, opt => {opt.MapFrom(src => src.Area.Name);});
+
+            CreateMap<TeamDTO, Team>()
+            .ForMember(dest => dest.AreaName, opt => {opt.MapFrom(src => src.Area.Name);});
+            
+            CreateMap<PlayerDTO, Player>()
+            .ForMember(dest => dest.DateOfBirth, opt => {opt.MapFrom(src => Convert.ToDateTime(src.DateOfBirth));});
+
         }
-
-
     }
 }

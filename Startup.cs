@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using AutoMapper;
+using FootbalDataAPI.DATA;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -34,9 +35,6 @@ namespace Solstice.API
             services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("SqliteConnection"))
                 .EnableSensitiveDataLogging(true)
             );
-            /* services.AddDbContext<DataContext>(x => x.UseMySql(Configuration.GetConnectionString("MysqlConnection"))
-             .ConfigureWarnings(warnings => warnings.Ignore(CoreEventId.IncludeIgnoredWarning)));
-            */
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -61,12 +59,14 @@ namespace Solstice.API
 
             services.AddCors();
             services.AddAutoMapper();
-            services.AddTransient<Seed>();
+            //services.AddTransient<Seed>();
             services.AddScoped<IContactRepository, ContactRepository>();
+            services.AddScoped<IFootballDataRepository, FootballDataRepository>();
+            services.AddScoped<IFootBallApiService, FootballApiService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, Seed seeder)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -103,7 +103,6 @@ namespace Solstice.API
                 });
                 //app.UseHsts();
             }
-            seeder.SeedContacts();
             app.UseHttpsRedirection();
             app.UseMvc();
         }
