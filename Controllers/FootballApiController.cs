@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using AutoMapper;
 using FootbalDataAPI.DATA;
 using FootbalDataAPI.models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FootbalDataAPI.Controllers
 {
-
-    [Route("api/[controller]")]
+    [EnableCors("AllowAll")]
     [ApiController]
     public class FootballApiController : ControllerBase
     {
@@ -26,8 +26,8 @@ namespace FootbalDataAPI.Controllers
         [HttpGet("import-league/{leagueCode}")]
         public async Task<IActionResult> ImportLeague(string leagueCode)
         {
-            //try
-            //{
+            try
+            {
                 if (await _repo.CompetitionExists(leagueCode))
                 {
                     return StatusCode(409, new { message = "League already imported" });
@@ -72,15 +72,19 @@ namespace FootbalDataAPI.Controllers
                     }
                 }
                 return StatusCode(201, new { message = "Successfully imported" });
-            /*
             }
-            
             catch (System.Exception)
             {
 
                 return StatusCode(504, new { message = "Server Error" });
             }
-            */
+
+        }
+
+        [HttpGet("total-players/{leagueCode}")]
+        public async Task<IActionResult> TotalPlayers(string leagueCode) {
+            int totalPlayers = await _repo.TotalPlayers(leagueCode);
+            return Ok(new {total = totalPlayers});
         }
     }
 }
