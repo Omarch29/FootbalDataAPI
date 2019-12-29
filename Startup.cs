@@ -60,7 +60,7 @@ namespace Football.API
             services.AddCors();
             services.AddAutoMapper();
             services.AddScoped<IFootballDataRepository, FootballDataRepository>();
-            services.AddScoped<IFootBallApiService, FootballApiService>();
+            services.AddScoped<IFootBallApiService, FootballApiService>(f => new FootballApiService(Configuration.GetSection("ApiToken").Value));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

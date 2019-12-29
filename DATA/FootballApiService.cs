@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
+using AutoMapper.Configuration;
 using FootbalDataAPI.DTOs;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,42 +13,69 @@ namespace FootbalDataAPI.DATA
     public class FootballApiService : IFootBallApiService
     {
         private const string API_URL = "https://api.football-data.org/v2/";
-        private const string TOKEN = "edb06c56816c454ea93bab142355eb57";
+        private readonly string TOKEN;
+
+        public FootballApiService(string token)
+        {
+            TOKEN = token;
+        }
 
         private string GetAsync(string path)
         {
-            HttpClient httpClient = new HttpClient();
-            var headers = httpClient.DefaultRequestHeaders;
-            headers.Remove("X-Auth-Token");
-            headers.Add("X-Auth-Token", TOKEN);
-            Uri requestUri = new Uri(API_URL + path);
-            HttpResponseMessage httpResponse;
-            httpResponse = httpClient.GetAsync(requestUri).GetAwaiter().GetResult();
-            httpResponse.EnsureSuccessStatusCode();
-            string httpResponseBody = httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-            var responseHeaders = httpResponse.Headers;
-            IEnumerable<string> values;
-            int AvailableRequests = 0;
-            int RequestCounter = 0;
-            if (responseHeaders.TryGetValues("X-Requests-Available-Minute", out values))
+            string response = "";
+            try
             {
-                string AvailableMinute = values.First();
-                AvailableRequests = int.Parse(AvailableMinute);
-            }
-            if (responseHeaders.TryGetValues("X-RequestCounter-Reset", out values))
-            {
-                string RequestCounterReset = values.First();
-                RequestCounter = int.Parse(RequestCounterReset);
-            }
-            if (AvailableRequests == 0)
-            {
-                if (RequestCounter > 0)
+                // Create instance of HttpClient
+                using (HttpClient httpClient = new HttpClient())
                 {
-                    System.Threading.Thread.Sleep(RequestCounter * 1000);
+
+                    // Add Auth Headers
+                    var headers = httpClient.DefaultRequestHeaders;
+                    headers.Remove("X-Auth-Token");
+                    headers.Add("X-Auth-Token", TOKEN);
+
+                    // Execute the Request
+                    Uri requestUri = new Uri(API_URL + path);
+                    HttpResponseMessage httpResponse;
+                    httpResponse = httpClient.GetAsync(requestUri).GetAwaiter().GetResult();
+                    httpResponse.EnsureSuccessStatusCode();
+                    // get the response
+                    string httpResponseBody = httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                    // get the Response Headers
+                    var responseHeaders = httpResponse.Headers;
+                    IEnumerable<string> values;
+                    int AvailableRequests = 0;
+                    int RequestCounter = 0;
+                    // Get the Avaible Requests in a minute from the Response Header
+                    if (responseHeaders.TryGetValues("X-Requests-Available-Minute", out values))
+                    {
+                        string AvailableMinute = values.First();
+                        AvailableRequests = int.Parse(AvailableMinute);
+                    }
+                    // Get the Request Counter (in seconds) to make a new request
+                    if (responseHeaders.TryGetValues("X-RequestCounter-Reset", out values))
+                    {
+                        string RequestCounterReset = values.First();
+                        RequestCounter = int.Parse(RequestCounterReset);
+                    }
+                    // If there's not more Avaible Request the thread Wait to complete a minute from the first request done.
+                    if (AvailableRequests == 0)
+                    {
+                        if (RequestCounter > 0)
+                        {
+                            System.Threading.Thread.Sleep((RequestCounter + 1) * 1000);
+                        }
+                    }
+                    // Return the JSON response as string
+                    response = httpResponseBody;
                 }
             }
-            httpClient.Dispose();
-            return httpResponseBody;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return response;
+            }
+            return response;
         }
 
         public CompetitionDTO GetCompetition(int Id)
