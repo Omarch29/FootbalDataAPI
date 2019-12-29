@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using FootbalDataAPI.DATA;
@@ -47,7 +48,7 @@ namespace FootbalDataAPI.Controllers
                     };
                     await _repo.Add(teamComptetion);
 
-                    foreach (var player in completeTeam.Squad)
+                    foreach (var player in completeTeam.Squad.Where(x => x.Role == "PLAYER"))
                     {
                         var newPlayer = _mapper.Map<Player>(player);
                         if (!await _repo.CheckIfEntityExistsByEntityId<Player>(x => x.Id == player.Id))
