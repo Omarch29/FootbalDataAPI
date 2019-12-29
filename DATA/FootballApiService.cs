@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using FootbalDataAPI.DTOs;
 using Newtonsoft.Json;
@@ -21,7 +22,29 @@ namespace FootbalDataAPI.DATA
             Uri requestUri = new Uri(API_URL + path);
             HttpResponseMessage httpResponse;
             httpResponse = httpClient.GetAsync(requestUri).GetAwaiter().GetResult();
+            httpResponse.EnsureSuccessStatusCode();
             string httpResponseBody = httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+            var responseHeaders = httpResponse.Headers;
+            IEnumerable<string> values;
+            int AvailableRequests = 0;
+            int RequestCounter = 0;
+            if (responseHeaders.TryGetValues("X-Requests-Available-Minute", out values))
+            {
+                string AvailableMinute = values.First();
+                AvailableRequests = int.Parse(AvailableMinute);
+            }
+            if (responseHeaders.TryGetValues("X-RequestCounter-Reset", out values))
+            {
+                string RequestCounterReset = values.First();
+                RequestCounter = int.Parse(RequestCounterReset);
+            }
+            if (AvailableRequests == 0)
+            {
+                if (RequestCounter > 0)
+                {
+                    System.Threading.Thread.Sleep(RequestCounter * 1000);
+                }
+            }
             httpClient.Dispose();
             return httpResponseBody;
         }
@@ -34,15 +57,18 @@ namespace FootbalDataAPI.DATA
             return result;
         }
 
-        public CompetitionAndTeamsDTO GetCompetitionAndTeams(int CompetitionId)
+        public CompetitionAndTeamsDTO GetCompetitionAndTeams(string legueCode)
         {
             var result = new CompetitionAndTeamsDTO();
-            string jsonString = GetAsync($"/competitions/{ CompetitionId }/teams");
+            string jsonString = GetAsync($"/competitions/{ legueCode }/teams");
             var json = JObject.Parse(jsonString);
-            var teamsJson = json["teams"].ToString();
-            var competitionJson = json["competition"].ToString();
-            result.Teams = JsonConvert.DeserializeObject<List<TeamDTO>>(teamsJson);
-            result.Competition = JsonConvert.DeserializeObject<CompetitionDTO>(competitionJson);
+            if (json != null)
+            {
+                var teamsJson = json["teams"].ToString();
+                var competitionJson = json["competition"].ToString();
+                result.Teams = JsonConvert.DeserializeObject<List<TeamDTO>>(teamsJson);
+                result.Competition = JsonConvert.DeserializeObject<CompetitionDTO>(competitionJson);
+            }
             return result;
         }
 
@@ -60,10 +86,13 @@ namespace FootbalDataAPI.DATA
             var result = new CompleteTeamDTO();
             string jsonString = GetAsync($"/teams/{ TeamId }");
             var json = JObject.Parse(jsonString);
-            var squadJson = json["squad"].ToString();
-            result.Squad = JsonConvert.DeserializeObject<List<PlayerDTO>>(squadJson);
-            var competitionsJson = json["activeCompetitions"].ToString();
-            result.ActiveCompetitions = JsonConvert.DeserializeObject<List<CompetitionDTO>>(competitionsJson);
+            if (json != null)
+            {
+                var squadJson = json["squad"].ToString();
+                result.Squad = JsonConvert.DeserializeObject<List<PlayerDTO>>(squadJson);
+                var competitionsJson = json["activeCompetitions"].ToString();
+                result.ActiveCompetitions = JsonConvert.DeserializeObject<List<CompetitionDTO>>(competitionsJson);
+            }
             return result;
         }
 

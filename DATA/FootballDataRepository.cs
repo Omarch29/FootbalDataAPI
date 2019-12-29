@@ -25,9 +25,9 @@ namespace FootbalDataAPI.DATA
             return entity;
         }
 
-        public async Task<bool> CompetitionExists(int competitionId)
+        public async Task<bool> CompetitionExists(string leagueCode)
         {
-            return await _context.Competitions.AnyAsync(c => c.Id == competitionId);
+            return await _context.Competitions.AnyAsync(c => c.Code == leagueCode);
         }
 
         public async Task<bool> CheckIfEntityExistsByEntityId<T>(Expression<Func<T, bool>> expr) where T : class
