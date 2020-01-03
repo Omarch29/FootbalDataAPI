@@ -4,14 +4,17 @@ namespace Football.API.DATA
 {
     public class DataContext : DbContext
     {
+        public DataContext()
+        { }
+
         public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
-        public DbSet<Competition> Competitions { get; set; }
-        public DbSet<Team> Teams { get; set; }
-        public DbSet<CompetitionTeam> CompetitionTeams { get; set; }
+        public virtual DbSet<Competition> Competitions { get; set; }
+        public virtual DbSet<Team> Teams { get; set; }
+        public virtual DbSet<CompetitionTeam> CompetitionTeams { get; set; }
 
-        public DbSet<TeamPlayer> TeamPlayers { get; set; }
-        public DbSet<Player> Players { get; set; }
+        public virtual DbSet<TeamPlayer> TeamPlayers { get; set; }
+        public virtual DbSet<Player> Players { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
